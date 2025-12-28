@@ -1,7 +1,7 @@
 package main
 
-import "github.com/muhriddinnorqulov/wiregenx/internal"
+import "github.com/muhriddinnorqulov/wiregenx/pkg"
 
 func main() {
-	internal.Inject()
+	pkg.Inject()
 }

@@ -1,4 +1,4 @@
-package internal
+package pkg
 
 type InjectFunc struct {
 	PkgName    string // package name in file
