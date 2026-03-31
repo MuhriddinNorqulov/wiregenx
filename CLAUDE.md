@@ -9,9 +9,9 @@ Wiregenx is a Go CLI tool that generates a standalone DI (dependency injection) 
 ## Build & Run Commands
 
 ```bash
-go build ./...                                                            # Build
-go run ./cmd/wiregenx2 --root ./path --out container/container_gen.go     # Run
-go vet ./...                                                              # Static analysis
+go build ./...                                                        # Build
+go run ./cmd/wiregenx2 --root ./path --out container/container_gen.go # Run
+go vet ./...                                                # Static analysis
 ```
 
 No tests exist yet. No Makefile or CI pipeline.

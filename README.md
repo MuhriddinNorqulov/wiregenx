@@ -7,7 +7,7 @@
 ## Installation
 
 ```bash
-go install github.com/muhriddinnorqulov/wiregenx/v2/cmd/wiregenx2@latest
+go install github.com/muhriddinnorqulov/wiregenx/cmd/wiregenx2@v2.0
 ```
 
 ---
@@ -236,7 +236,7 @@ func main() {
 | Annotatsiyalar | `@Inject`, `@Factory`, `@Application`, `@Singleton`, `@Prototype` | `@inject`, `@inject(singleton/prototype)`, `@Application("name")` |
 | Container | Bitta `Container` | Har bir `@Application` uchun alohida Container |
 | Constructor | `New() (*Container, error)` | `NewXxxContainer() *XxxContainer` (panic on error) |
-| Binary | `wiregenx` | `wiregenx2` |
+| Binary | `wiregenx` | `wiregenx` |
 
 ---
 
