@@ -8,16 +8,13 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	"strings"
 )
 
-var injectRe = regexp.MustCompile(`^\s*//\s*@inject(\b|:)`)
-
 func Inject() {
 	root := flag.String("root", ".", "repo root to scan")
-	out := flag.String("out", "wire_provider.go", "output file (relative to root)")
-	outPkg := flag.String("pkg", "wire", "output package name")
+	out := flag.String("out", "container_gen.go", "output file (relative to root)")
+	outPkg := flag.String("pkg", "container", "output package name")
 	ignoreVendor := flag.Bool("no-vendor", true, "ignore vendor/")
 	ignoreHidden := flag.Bool("no-hidden", true, "ignore hidden dirs like .git/")
 	flag.Parse()
@@ -25,43 +22,59 @@ func Inject() {
 	absRoot, err := filepath.Abs(*root)
 	must(err)
 
-	funcs, err := scanInjectFuncs(absRoot, *ignoreVendor, *ignoreHidden)
+	// 1. Scan for annotated providers
+	providers, err := scanProviders(absRoot, *ignoreVendor, *ignoreHidden)
 	must(err)
 
-	if len(funcs) == 0 {
-		fmt.Println("no @inject functions found")
-		// Still generate empty set (useful for stable builds)
+	if len(providers) == 0 {
+		fmt.Println("no annotated provider functions found (@Inject, @Factory, @Application)")
+		return
 	}
 
-	// Map dir -> import path (via go list)
-	dirToImport, err := resolveImportPaths(absRoot, funcs)
+	fmt.Printf("found %d provider(s)\n", len(providers))
+
+	// 2. Resolve import paths via go list
+	dirToImport, err := resolveImportPaths(absRoot, providers)
 	must(err)
-	for i := range funcs {
-		funcs[i].ImportPath = dirToImport[filepath.Dir(funcs[i].File)]
+
+	for i := range providers {
+		dir := filepath.Dir(providers[i].File)
+		providers[i].ImportPath = dirToImport[dir]
+
+		// Resolve local types (no ImportPath) to their package's import path
+		if providers[i].ReturnType.ImportPath == "" && !builtinTypes[providers[i].ReturnType.TypeName] {
+			providers[i].ReturnType.ImportPath = providers[i].ImportPath
+		}
+		for j := range providers[i].Params {
+			if providers[i].Params[j].ImportPath == "" && !builtinTypes[providers[i].Params[j].TypeName] {
+				providers[i].Params[j].ImportPath = providers[i].ImportPath
+			}
+		}
 	}
 
-	// Generate file
+	// 3. Resolve dependency graph (topological sort)
+	sorted, err := resolveGraph(providers)
+	must(err)
+
+	// 4. Render container
+	code, err := renderContainer(*outPkg, sorted)
+	must(err)
+
+	// 5. Write output file
 	outPath := filepath.Join(absRoot, filepath.FromSlash(*out))
 	must(os.MkdirAll(filepath.Dir(outPath), 0o755))
-
-	code, err := renderWireProviders(*outPkg, funcs)
-	must(err)
-
 	must(os.WriteFile(outPath, code, 0o644))
+
 	fmt.Println("generated:", outPath)
 }
 
-func resolveImportPaths(root string, funcs []InjectFunc) (map[string]string, error) {
-	// Collect unique dirs
+func resolveImportPaths(root string, providers []Provider) (map[string]string, error) {
 	uniq := map[string]struct{}{}
-	for _, f := range funcs {
-		uniq[filepath.Dir(f.File)] = struct{}{}
+	for _, p := range providers {
+		uniq[filepath.Dir(p.File)] = struct{}{}
 	}
 
-	// For each dir, run: go list -json .
-	// (we set cmd.Dir=dir so it resolves that package)
 	dirToImport := map[string]string{}
-
 	for dir := range uniq {
 		pkg, err := goListPkg(dir)
 		if err != nil {

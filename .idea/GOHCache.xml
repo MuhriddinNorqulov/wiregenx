@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GoORMHelperCache">
+    <option name="schemaMapping">
+      <map>
+        <entry key="GoListPkg">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/pkg/type.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="InjectFunc">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/pkg/type.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="StcVoteModel">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/../mobility/src/infrastructure/persistence/models/stc_vote_model.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="imp">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/pkg/render.go" />
+            </set>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="scannedPathMapping">
+      <map>
+        <entry key="file://$PROJECT_DIR$/../mobility/src/core/domain/entity/enum/vote.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1774949991038" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/../mobility/src/infrastructure/persistence/models/stc_vote_model.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1774950153715" />
+              <option name="schema">
+                <list>
+                  <option value="StcVoteModel" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/main.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1768049649899" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/pkg/inject.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1768049649899" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/pkg/render.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1768049649899" />
+              <option name="schema">
+                <list>
+                  <option value="imp" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/pkg/scanner.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1768049649899" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/pkg/type.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1768049649899" />
+              <option name="schema">
+                <list>
+                  <option value="InjectFunc" />
+                  <option value="GoListPkg" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/pkg/utils.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1768049649899" />
+            </ScannedPath>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="tableStructMapping">
+      <map>
+        <entry key="go_list_pkg" value="GoListPkg" />
+        <entry key="imp" value="imp" />
+        <entry key="inject_func" value="InjectFunc" />
+        <entry key="stc_vote_model" value="StcVoteModel" />
+      </map>
+    </option>
+    <option name="lastTimeChecked" value="1774949163722" />
+  </component>
+</project>
