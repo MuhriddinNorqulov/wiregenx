@@ -1,13 +1,13 @@
-# wiregenx
+# wiregenx v2
 
-`wiregenx` — Go uchun annotation-based dependency injection container generator. Spring Framework'ga o'xshash `@` annotatsiyalar orqali DI container'ni avtomatik generatsiya qiladi. **Google Wire kutubxonasi talab qilinmaydi.**
+`wiregenx` — Go uchun annotation-based dependency injection container generator. `@inject` va `@Application` annotatsiyalar orqali DI containerlarni avtomatik generatsiya qiladi. **Hech qanday tashqi kutubxona talab qilinmaydi** — generatsiya qilingan kod pure Go.
 
 ---
 
 ## Installation
 
 ```bash
-go install github.com/muhriddinnorqulov/wiregenx@latest
+go install github.com/muhriddinnorqulov/wiregenx/v2@latest
 ```
 
 ---
@@ -16,11 +16,10 @@ go install github.com/muhriddinnorqulov/wiregenx@latest
 
 | Annotatsiya | Tavsif |
 |---|---|
-| `@Inject` | Funksiyani provider sifatida belgilaydi (return type = bean, parametrlar = dependency) |
-| `@Application` | Dasturning root entry point |
-| `@Singleton` | Faqat bitta instance yaratiladi (default) |
-| `@Prototype` | Har safar yangi instance yaratiladi |
-| `@Factory` | Funksiya `(T, error)` qaytaradi |
+| `@inject` | Funksiyani provider sifatida belgilaydi (default: singleton) |
+| `@inject(singleton)` | Faqat bitta instance yaratiladi (default) |
+| `@inject(prototype)` | Har safar yangi instance yaratiladi |
+| `@Application("name")` | Application entry point — alohida nomli Container generatsiya qiladi |
 
 ---
 
@@ -32,41 +31,28 @@ go install github.com/muhriddinnorqulov/wiregenx@latest
 // config/config.go
 package config
 
-type Config struct { DSN string }
+type Config struct {
+    DSN  string
+    Port int
+}
 
-// @Inject
-// @Singleton
-func New() *Config {
-    return &Config{DSN: "postgres://localhost/mydb"}
+// @inject
+func NewConfig() *Config {
+    return &Config{DSN: "postgres://localhost/mydb", Port: 8080}
 }
 ```
 
 ```go
-// database/db.go
+// database/database.go
 package database
 
 import "myapp/config"
 
-type DB struct { cfg *config.Config }
+type DB struct{ cfg *config.Config }
 
-// @Factory
-// @Singleton
-func New(cfg *config.Config) (*DB, error) {
+// @inject
+func NewDB(cfg *config.Config) (*DB, error) {
     return &DB{cfg: cfg}, nil
-}
-```
-
-```go
-// repo/user.go
-package repo
-
-import "myapp/database"
-
-type UserRepo struct { db *database.DB }
-
-// @Inject
-func NewUserRepo(db *database.DB) *UserRepo {
-    return &UserRepo{db: db}
 }
 ```
 
@@ -74,14 +60,57 @@ func NewUserRepo(db *database.DB) *UserRepo {
 // service/user.go
 package service
 
-import "myapp/repo"
+import "myapp/database"
 
-type UserService struct { repo *repo.UserRepo }
+type UserService struct{ db *database.DB }
 
-// @Inject
-// @Prototype
-func NewUserService(repo *repo.UserRepo) *UserService {
-    return &UserService{repo: repo}
+// @inject
+func NewUserService(db *database.DB) *UserService {
+    return &UserService{db: db}
+}
+```
+
+### Application entry pointlar
+
+Har bir `@Application` uchun alohida Container generatsiya qilinadi — faqat o'ziga kerakli dependency lar bilan.
+
+```go
+// http/app.go
+package http
+
+import (
+    "myapp/config"
+    "myapp/service"
+)
+
+type App struct {
+    cfg     *config.Config
+    userSvc *service.UserService
+}
+
+// @Application("http")
+func NewApp(cfg *config.Config, userSvc *service.UserService) *App {
+    return &App{cfg: cfg, userSvc: userSvc}
+}
+```
+
+```go
+// websocket/app.go
+package websocket
+
+import (
+    "myapp/config"
+    "myapp/database"
+)
+
+type App struct {
+    cfg *config.Config
+    db  *database.DB
+}
+
+// @Application("websocket")
+func NewApp(cfg *config.Config, db *database.DB) *App {
+    return &App{cfg: cfg, db: db}
 }
 ```
 
@@ -101,53 +130,79 @@ import (
     "fmt"
     "myapp/config"
     "myapp/database"
-    "myapp/repo"
+    "myapp/http"
     "myapp/service"
+    "myapp/websocket"
 )
 
-type Container struct {
-    config   *config.Config
-    db       *database.DB
-    userRepo *repo.UserRepo
+// HttpContainer — faqat http app uchun kerakli dependency lar
+type HttpContainer struct {
+    config      *config.Config
+    db          *database.DB
+    userService *service.UserService
+    app         *http.App
 }
 
-func New() (*Container, error) {
-    c := &Container{}
+func NewHttpContainer() *HttpContainer {
+    c := &HttpContainer{}
 
-    c.config = config.New()
+    c.config = config.NewConfig()
 
     var err error
-    c.db, err = database.New(c.config)
+    c.db, err = database.NewDB(c.config)
     if err != nil {
-        return nil, fmt.Errorf("wiregenx: database.New: %w", err)
+        panic(fmt.Sprintf("wiregenx: database.NewDB: %s", err))
     }
 
-    c.userRepo = repo.NewUserRepo(c.db)
+    c.userService = service.NewUserService(c.db)
+    c.app = http.NewApp(c.config, c.userService)
 
-    return c, nil
+    return c
 }
 
-func (c *Container) Config() *config.Config       { return c.config }
-func (c *Container) DB() *database.DB              { return c.db }
-func (c *Container) UserRepo() *repo.UserRepo      { return c.userRepo }
+func (c *HttpContainer) Config() *config.Config           { return c.config }
+func (c *HttpContainer) DB() *database.DB                 { return c.db }
+func (c *HttpContainer) UserService() *service.UserService { return c.userService }
+func (c *HttpContainer) App() *http.App                   { return c.app }
 
-// Prototype — har safar yangi instance
-func (c *Container) UserService() *service.UserService {
-    return service.NewUserService(c.userRepo)
+// WebsocketContainer — faqat websocket app uchun kerakli dependency lar
+// (UserService kerak emas — shuning uchun yo'q)
+type WebsocketContainer struct {
+    config *config.Config
+    db     *database.DB
+    app    *websocket.App
 }
+
+func NewWebsocketContainer() *WebsocketContainer {
+    c := &WebsocketContainer{}
+
+    c.config = config.NewConfig()
+
+    var err error
+    c.db, err = database.NewDB(c.config)
+    if err != nil {
+        panic(fmt.Sprintf("wiregenx: database.NewDB: %s", err))
+    }
+
+    c.app = websocket.NewApp(c.config, c.db)
+
+    return c
+}
+
+func (c *WebsocketContainer) Config() *config.Config { return c.config }
+func (c *WebsocketContainer) DB() *database.DB       { return c.db }
+func (c *WebsocketContainer) App() *websocket.App    { return c.app }
 ```
 
 ### Foydalanish
 
 ```go
 func main() {
-    c, err := container.New()
-    if err != nil {
-        log.Fatal(err)
-    }
+    httpC := container.NewHttpContainer()
+    httpC.App() // *http.App
 
-    svc := c.UserService() // har safar yangi instance
-    repo := c.UserRepo()   // singleton
+    wsC := container.NewWebsocketContainer()
+    wsC.App() // *websocket.App
 }
 ```
 
@@ -167,13 +222,24 @@ func main() {
 
 ## Qanday ishlaydi
 
-1. **Scan** — Loyiha fayllarini skanerlab, `@Inject`, `@Factory`, `@Application` annotatsiyali funksiyalarni topadi
+1. **Scan** — Loyiha fayllarini skanerlab, `@inject` va `@Application` annotatsiyali funksiyalarni topadi
 2. **Resolve** — `go list -json` orqali import path'larni aniqlaydi
-3. **Graph** — Dependency graph tuzadi, topologik tartibda saralaydi, circular dependency'larni tekshiradi
-4. **Generate** — `Container` struct, `New()` konstruktor va getter method'larni generatsiya qiladi
+3. **Graph** — Har bir `@Application` uchun dependency subgraph tuzadi, topologik tartibda saralaydi, circular dependency va topilmagan providerlarni tekshiradi
+4. **Generate** — Har bir app uchun alohida Container struct, konstruktor va getter method'larni generatsiya qiladi
+
+---
+
+## v1 dan farqi
+
+| | v1 | v2 |
+|---|---|---|
+| Annotatsiyalar | `@Inject`, `@Factory`, `@Application`, `@Singleton`, `@Prototype` | `@inject`, `@inject(singleton/prototype)`, `@Application("name")` |
+| Container | Bitta `Container` | Har bir `@Application` uchun alohida Container |
+| Constructor | `New() (*Container, error)` | `NewXxxContainer() *XxxContainer` (panic on error) |
+| Install | `go get .../wiregenx` | `go get .../wiregenx/v2` |
 
 ---
 
 ## Requirements
 
-* Go 1.20+
+* Go 1.21+

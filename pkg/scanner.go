@@ -12,11 +12,8 @@ import (
 )
 
 var (
-	reInject      = regexp.MustCompile(`^\s*//\s*@Inject\s*$`)
-	reApplication = regexp.MustCompile(`^\s*//\s*@Application\s*$`)
-	reSingleton   = regexp.MustCompile(`^\s*//\s*@Singleton\s*$`)
-	rePrototype   = regexp.MustCompile(`^\s*//\s*@Prototype\s*$`)
-	reFactory     = regexp.MustCompile(`^\s*//\s*@Factory\s*$`)
+	reInject      = regexp.MustCompile(`^\s*//\s*@inject(?:\((\w+)\))?\s*$`)
+	reApplication = regexp.MustCompile(`^\s*//\s*@Application\("([^"]+)"\)\s*$`)
 )
 
 // scanProviders walks the directory tree and finds all annotated provider functions.
@@ -63,17 +60,11 @@ func scanProviders(root string, ignoreVendor, ignoreHidden bool) ([]Provider, er
 				continue
 			}
 
-			// Extract parameters
 			params := extractParams(fn.Type.Params, imports)
 
-			// Extract return type
-			retType, isFactory, err := extractReturnType(fn.Type.Results, imports)
+			retType, returnsError, err := extractReturnType(fn.Type.Results, imports)
 			if err != nil {
 				return fmt.Errorf("%s: %s: %w", path, fn.Name.Name, err)
-			}
-
-			if ann.isFactory {
-				isFactory = true
 			}
 
 			scope := ScopeSingleton
@@ -82,14 +73,15 @@ func scanProviders(root string, ignoreVendor, ignoreHidden bool) ([]Provider, er
 			}
 
 			out = append(out, Provider{
-				FuncName:   fn.Name.Name,
-				PkgName:    pkgName,
-				File:       path,
-				Params:     params,
-				ReturnType: retType,
-				Scope:      scope,
-				IsFactory:  isFactory || ann.isFactory,
-				IsApp:      ann.isApp,
+				FuncName:     fn.Name.Name,
+				PkgName:      pkgName,
+				File:         path,
+				Params:       params,
+				ReturnType:   retType,
+				Scope:        scope,
+				ReturnsError: returnsError,
+				IsApp:        ann.isApp,
+				AppName:      ann.appName,
 			})
 		}
 
@@ -103,9 +95,9 @@ func scanProviders(root string, ignoreVendor, ignoreHidden bool) ([]Provider, er
 }
 
 type annotations struct {
-	isProvider bool // @Inject or @Application or @Factory
-	isApp      bool // @Application
-	isFactory  bool // @Factory
+	isProvider bool
+	isApp      bool
+	appName    string
 	scope      Scope
 }
 
@@ -115,16 +107,22 @@ func parseAnnotations(cg *ast.CommentGroup) annotations {
 		switch {
 		case reInject.MatchString(c.Text):
 			a.isProvider = true
+			matches := reInject.FindStringSubmatch(c.Text)
+			if len(matches) >= 2 && matches[1] != "" {
+				switch strings.ToLower(matches[1]) {
+				case "prototype":
+					a.scope = ScopePrototype
+				case "singleton":
+					a.scope = ScopeSingleton
+				}
+			}
 		case reApplication.MatchString(c.Text):
 			a.isProvider = true
 			a.isApp = true
-		case reFactory.MatchString(c.Text):
-			a.isProvider = true
-			a.isFactory = true
-		case reSingleton.MatchString(c.Text):
-			a.scope = ScopeSingleton
-		case rePrototype.MatchString(c.Text):
-			a.scope = ScopePrototype
+			matches := reApplication.FindStringSubmatch(c.Text)
+			if len(matches) >= 2 {
+				a.appName = matches[1]
+			}
 		}
 	}
 	return a
@@ -136,10 +134,8 @@ func buildImportMap(file *ast.File) map[string]string {
 	for _, imp := range file.Imports {
 		path := strings.Trim(imp.Path.Value, `"`)
 		if imp.Name != nil {
-			// Explicit alias
 			m[imp.Name.Name] = path
 		} else {
-			// Default: last segment of import path
 			seg := path
 			if idx := strings.LastIndex(seg, "/"); idx >= 0 {
 				seg = seg[idx+1:]
@@ -150,29 +146,27 @@ func buildImportMap(file *ast.File) map[string]string {
 	return m
 }
 
-// extractParams extracts TypeRef for each function parameter.
-func extractParams(fields *ast.FieldList, imports map[string]string) []TypeRef {
+// extractParams extracts Param (name + type) for each function parameter.
+func extractParams(fields *ast.FieldList, imports map[string]string) []Param {
 	if fields == nil {
 		return nil
 	}
-	var params []TypeRef
+	var params []Param
 	for _, field := range fields.List {
 		tr := resolveTypeExpr(field.Type, imports)
-		// A field can have multiple names (e.g., a, b int), each is a separate param
-		count := len(field.Names)
-		if count == 0 {
-			count = 1 // unnamed parameter
-		}
-		for i := 0; i < count; i++ {
-			params = append(params, tr)
+		if len(field.Names) == 0 {
+			params = append(params, Param{Type: tr})
+		} else {
+			for _, name := range field.Names {
+				params = append(params, Param{Name: name.Name, Type: tr})
+			}
 		}
 	}
 	return params
 }
 
 // extractReturnType extracts the primary return type.
-// Returns (TypeRef, isFactory, error).
-// For (T, error) signatures, returns T and isFactory=true.
+// Auto-detects (T, error) signatures → returnsError=true.
 func extractReturnType(results *ast.FieldList, imports map[string]string) (TypeRef, bool, error) {
 	if results == nil || len(results.List) == 0 {
 		return TypeRef{}, false, fmt.Errorf("provider function must have a return type")
@@ -212,7 +206,6 @@ func resolveTypeExpr(expr ast.Expr, imports map[string]string) TypeRef {
 		return inner
 
 	case *ast.SelectorExpr:
-		// pkg.Type
 		ident, ok := t.X.(*ast.Ident)
 		if !ok {
 			return TypeRef{Raw: formatExpr(expr)}
@@ -227,12 +220,10 @@ func resolveTypeExpr(expr ast.Expr, imports map[string]string) TypeRef {
 		}
 
 	case *ast.Ident:
-		// Local type or builtin
 		name := t.Name
 		if builtinTypes[name] {
 			return TypeRef{TypeName: name, Raw: name}
 		}
-		// Local type — ImportPath will be filled later during import resolution
 		return TypeRef{TypeName: name, Raw: name}
 
 	case *ast.ArrayType:
@@ -255,7 +246,6 @@ func resolveTypeExpr(expr ast.Expr, imports map[string]string) TypeRef {
 	}
 }
 
-// formatExpr returns a rough string representation of an AST expression for Raw field.
 func formatExpr(expr ast.Expr) string {
 	switch t := expr.(type) {
 	case *ast.Ident:

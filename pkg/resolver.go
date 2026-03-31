@@ -6,7 +6,6 @@ import (
 )
 
 // resolveGraph validates the dependency graph and returns providers in topological order.
-// Singletons come first (in dependency order), then prototypes.
 func resolveGraph(providers []Provider) ([]Provider, error) {
 	// Build provider map: canonical return type → provider index
 	typeToIdx := make(map[string]int)
@@ -25,8 +24,8 @@ func resolveGraph(providers []Provider) ([]Provider, error) {
 
 	// Validate all dependencies can be satisfied
 	for _, p := range providers {
-		for _, dep := range p.Params {
-			depKey := dep.FullName()
+		for _, param := range p.Params {
+			depKey := param.Type.FullName()
 			if _, ok := typeToIdx[depKey]; !ok {
 				return nil, fmt.Errorf(
 					"unsatisfied dependency: %s.%s (%s) requires %s, but no provider found",
@@ -42,14 +41,13 @@ func resolveGraph(providers []Provider) ([]Provider, error) {
 	inDeg := make([]int, n)
 
 	for i, p := range providers {
-		for _, dep := range p.Params {
-			depIdx := typeToIdx[dep.FullName()]
+		for _, param := range p.Params {
+			depIdx := typeToIdx[param.Type.FullName()]
 			adj[depIdx] = append(adj[depIdx], i)
 			inDeg[i]++
 		}
 	}
 
-	// Start with providers that have no dependencies
 	var queue []int
 	for i := 0; i < n; i++ {
 		if inDeg[i] == 0 {
@@ -72,7 +70,6 @@ func resolveGraph(providers []Provider) ([]Provider, error) {
 	}
 
 	if len(sorted) != n {
-		// Find cycle for error message
 		cycle := findCycle(providers, typeToIdx)
 		return nil, fmt.Errorf("circular dependency detected: %s", cycle)
 	}
@@ -80,7 +77,77 @@ func resolveGraph(providers []Provider) ([]Provider, error) {
 	return sorted, nil
 }
 
-// findCycle returns a human-readable description of a dependency cycle.
+// resolveApps builds a separate dependency graph for each @app provider.
+func resolveApps(apps []Provider, regular []Provider) ([]AppGroup, error) {
+	// Build type → provider map from @inject providers
+	typeMap := make(map[string]Provider)
+	for _, p := range regular {
+		key := p.ReturnType.FullName()
+		if _, exists := typeMap[key]; exists {
+			return nil, fmt.Errorf("duplicate provider for type %s", key)
+		}
+		typeMap[key] = p
+	}
+
+	var groups []AppGroup
+	for _, app := range apps {
+		deps, err := traceDeps(app, typeMap)
+		if err != nil {
+			return nil, fmt.Errorf("app %s.%s: %w", app.ImportPath, app.FuncName, err)
+		}
+
+		all := append(deps, app)
+		sorted, err := resolveGraph(all)
+		if err != nil {
+			return nil, fmt.Errorf("app %s.%s: %w", app.ImportPath, app.FuncName, err)
+		}
+
+		groups = append(groups, AppGroup{
+			App:       app,
+			Providers: sorted,
+			Name:      appContainerName(app),
+		})
+	}
+
+	return groups, nil
+}
+
+// traceDeps recursively collects all providers required by root.
+func traceDeps(root Provider, typeMap map[string]Provider) ([]Provider, error) {
+	visited := make(map[string]bool)
+	var result []Provider
+
+	var visit func(p Provider) error
+	visit = func(p Provider) error {
+		for _, param := range p.Params {
+			key := param.Type.FullName()
+			if visited[key] {
+				continue
+			}
+			visited[key] = true
+			dep, ok := typeMap[key]
+			if !ok {
+				return fmt.Errorf("unsatisfied dependency: requires %s, but no provider found", key)
+			}
+			if err := visit(dep); err != nil {
+				return err
+			}
+			result = append(result, dep)
+		}
+		return nil
+	}
+
+	if err := visit(root); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// appContainerName returns the container name prefix from @Application("name").
+func appContainerName(app Provider) string {
+	return upperFirst(app.AppName)
+}
+
 func findCycle(providers []Provider, typeToIdx map[string]int) string {
 	n := len(providers)
 	visited := make([]int, n) // 0=unvisited, 1=in-stack, 2=done
@@ -95,16 +162,14 @@ func findCycle(providers []Provider, typeToIdx map[string]int) string {
 	dfs = func(idx int) bool {
 		visited[idx] = 1
 		p := providers[idx]
-		for _, dep := range p.Params {
-			depIdx := typeToIdx[dep.FullName()]
+		for _, param := range p.Params {
+			depIdx := typeToIdx[param.Type.FullName()]
 			if visited[depIdx] == 1 {
-				// Found cycle — trace back
 				cyclePath = append(cyclePath, providers[depIdx].ImportPath+"."+providers[depIdx].FuncName)
 				for cur := idx; cur != depIdx; cur = parent[cur] {
 					cyclePath = append(cyclePath, providers[cur].ImportPath+"."+providers[cur].FuncName)
 				}
 				cyclePath = append(cyclePath, providers[depIdx].ImportPath+"."+providers[depIdx].FuncName)
-				// Reverse
 				for i, j := 0, len(cyclePath)-1; i < j; i, j = i+1, j-1 {
 					cyclePath[i], cyclePath[j] = cyclePath[j], cyclePath[i]
 				}

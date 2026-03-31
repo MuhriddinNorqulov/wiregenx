@@ -3,6 +3,15 @@
   <component name="GoORMHelperCache">
     <option name="schemaMapping">
       <map>
+        <entry key="CreateOrder">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/example_variant_a/usecase/create_order.go" />
+              <option value="file://$PROJECT_DIR$/example_variant_b/usecase/create_order.go" />
+              <option value="file://$PROJECT_DIR$/example_variant_c/usecase/create_order.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="GoListPkg">
           <value>
             <set>
@@ -17,10 +26,89 @@
             </set>
           </value>
         </entry>
+        <entry key="Order">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/example/repository/order_repo.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="OrderHandler">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/example_variant_a/handler/order_handler.go" />
+              <option value="file://$PROJECT_DIR$/example_variant_b/handler/order_handler.go" />
+              <option value="file://$PROJECT_DIR$/example_variant_c/handler/order_handler.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="OrderRepo">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/example/repository/order_repo.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Param">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/pkg/type.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Provider">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/pkg/type.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Redis">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/example/gateway/redis.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="StcVoteEntity">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/../mobility/src/core/domain/entity/stc_vote_entity.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="StcVoteModel">
           <value>
             <set>
               <option value="file://$PROJECT_DIR$/../mobility/src/infrastructure/persistence/models/stc_vote_model.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="StcVoteRepositoryImpl">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/../mobility/src/infrastructure/persistence/repository/stc_vote_repository_impl.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="TypeRef">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/pkg/type.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="VotingUseCase">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/../mobility/src/core/application/usecases/stcgroupusecases/voting_usecase.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="annotations">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/pkg/scanner.go" />
             </set>
           </value>
         </entry>
@@ -35,6 +123,18 @@
     </option>
     <option name="scannedPathMapping">
       <map>
+        <entry key="file://$PROJECT_DIR$/../mobility/src/core/application/usecases/stcgroupusecases/voting_usecase.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1774956484489" />
+              <option name="schema">
+                <list>
+                  <option value="VotingUseCase" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
         <entry key="file://$PROJECT_DIR$/../mobility/src/core/domain/entity/enum/vote.go">
           <value>
             <ScannedPath>
@@ -42,13 +142,148 @@
             </ScannedPath>
           </value>
         </entry>
+        <entry key="file://$PROJECT_DIR$/../mobility/src/core/domain/entity/stc_vote_entity.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1774951694588" />
+              <option name="schema">
+                <list>
+                  <option value="StcVoteEntity" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/../mobility/src/core/domain/ports/repository/stc_vote_repository.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1774951885125" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/../mobility/src/infrastructure/persistence/mapper/stc_vote_mapper.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1774951746327" />
+            </ScannedPath>
+          </value>
+        </entry>
         <entry key="file://$PROJECT_DIR$/../mobility/src/infrastructure/persistence/models/stc_vote_model.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1774950153715" />
+              <option name="lastModified" value="1774951885119" />
               <option name="schema">
                 <list>
                   <option value="StcVoteModel" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/../mobility/src/infrastructure/persistence/repository/stc_vote_repository_impl.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1774951885160" />
+              <option name="schema">
+                <list>
+                  <option value="StcVoteRepositoryImpl" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/example/gateway/redis.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1774951487754" />
+              <option name="schema">
+                <list>
+                  <option value="Redis" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/example/repository/order_repo.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1774952386903" />
+              <option name="schema">
+                <list>
+                  <option value="Order" />
+                  <option value="OrderRepo" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/example_variant_a/handler/order_handler.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1774953787723" />
+              <option name="schema">
+                <list>
+                  <option value="OrderHandler" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/example_variant_a/usecase/create_order.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1774953786671" />
+              <option name="schema">
+                <list>
+                  <option value="CreateOrder" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/example_variant_b/handler/order_handler.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1774953788708" />
+              <option name="schema">
+                <list>
+                  <option value="OrderHandler" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/example_variant_b/usecase/create_order.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1774953788247" />
+              <option name="schema">
+                <list>
+                  <option value="CreateOrder" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/example_variant_c/handler/order_handler.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1774953789645" />
+              <option name="schema">
+                <list>
+                  <option value="OrderHandler" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/example_variant_c/usecase/create_order.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1774953789168" />
+              <option name="schema">
+                <list>
+                  <option value="CreateOrder" />
                 </list>
               </option>
             </ScannedPath>
@@ -64,36 +299,45 @@
         <entry key="file://$PROJECT_DIR$/pkg/inject.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1768049649899" />
+              <option name="lastModified" value="1774951918787" />
             </ScannedPath>
           </value>
         </entry>
         <entry key="file://$PROJECT_DIR$/pkg/render.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1768049649899" />
-              <option name="schema">
-                <list>
-                  <option value="imp" />
-                </list>
-              </option>
+              <option name="lastModified" value="1774951555558" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/pkg/resolver.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1774951517420" />
             </ScannedPath>
           </value>
         </entry>
         <entry key="file://$PROJECT_DIR$/pkg/scanner.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1768049649899" />
+              <option name="lastModified" value="1774952388450" />
+              <option name="schema">
+                <list>
+                  <option value="annotations" />
+                </list>
+              </option>
             </ScannedPath>
           </value>
         </entry>
         <entry key="file://$PROJECT_DIR$/pkg/type.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1768049649899" />
+              <option name="lastModified" value="1774951452963" />
               <option name="schema">
                 <list>
-                  <option value="InjectFunc" />
+                  <option value="Provider" />
+                  <option value="Param" />
+                  <option value="TypeRef" />
                   <option value="GoListPkg" />
                 </list>
               </option>
@@ -111,10 +355,22 @@
     </option>
     <option name="tableStructMapping">
       <map>
+        <entry key="annotations" value="annotations" />
+        <entry key="create_order" value="CreateOrder" />
         <entry key="go_list_pkg" value="GoListPkg" />
         <entry key="imp" value="imp" />
         <entry key="inject_func" value="InjectFunc" />
+        <entry key="order" value="Order" />
+        <entry key="order_handler" value="OrderHandler" />
+        <entry key="order_repo" value="OrderRepo" />
+        <entry key="param" value="Param" />
+        <entry key="provider" value="Provider" />
+        <entry key="redis" value="Redis" />
+        <entry key="stc_vote_entity" value="StcVoteEntity" />
         <entry key="stc_vote_model" value="StcVoteModel" />
+        <entry key="stc_vote_repository_impl" value="StcVoteRepositoryImpl" />
+        <entry key="type_ref" value="TypeRef" />
+        <entry key="voting_use_case" value="VotingUseCase" />
       </map>
     </option>
     <option name="lastTimeChecked" value="1774949163722" />

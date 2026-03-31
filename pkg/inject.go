@@ -22,18 +22,16 @@ func Inject() {
 	absRoot, err := filepath.Abs(*root)
 	must(err)
 
-	// 1. Scan for annotated providers
 	providers, err := scanProviders(absRoot, *ignoreVendor, *ignoreHidden)
 	must(err)
 
 	if len(providers) == 0 {
-		fmt.Println("no annotated provider functions found (@Inject, @Factory, @Application)")
+		fmt.Println("no annotated provider functions found (@inject, @Application)")
 		return
 	}
 
 	fmt.Printf("found %d provider(s)\n", len(providers))
 
-	// 2. Resolve import paths via go list
 	dirToImport, err := resolveImportPaths(absRoot, providers)
 	must(err)
 
@@ -41,26 +39,41 @@ func Inject() {
 		dir := filepath.Dir(providers[i].File)
 		providers[i].ImportPath = dirToImport[dir]
 
-		// Resolve local types (no ImportPath) to their package's import path
+		// Resolve local types to their package's import path
 		if providers[i].ReturnType.ImportPath == "" && !builtinTypes[providers[i].ReturnType.TypeName] {
 			providers[i].ReturnType.ImportPath = providers[i].ImportPath
 		}
 		for j := range providers[i].Params {
-			if providers[i].Params[j].ImportPath == "" && !builtinTypes[providers[i].Params[j].TypeName] {
-				providers[i].Params[j].ImportPath = providers[i].ImportPath
+			if providers[i].Params[j].Type.ImportPath == "" && !builtinTypes[providers[i].Params[j].Type.TypeName] {
+				providers[i].Params[j].Type.ImportPath = providers[i].ImportPath
 			}
 		}
 	}
 
-	// 3. Resolve dependency graph (topological sort)
-	sorted, err := resolveGraph(providers)
-	must(err)
+	// Split into @app and @inject providers
+	var apps, regular []Provider
+	for _, p := range providers {
+		if p.IsApp {
+			apps = append(apps, p)
+		} else {
+			regular = append(regular, p)
+		}
+	}
 
-	// 4. Render container
-	code, err := renderContainer(*outPkg, sorted)
-	must(err)
+	var code []byte
+	if len(apps) > 0 {
+		groups, err := resolveApps(apps, regular)
+		must(err)
+		code, err = renderContainers(*outPkg, groups)
+		must(err)
+		fmt.Printf("generated %d container(s)\n", len(groups))
+	} else {
+		sorted, err := resolveGraph(providers)
+		must(err)
+		code, err = renderContainer(*outPkg, sorted)
+		must(err)
+	}
 
-	// 5. Write output file
 	outPath := filepath.Join(absRoot, filepath.FromSlash(*out))
 	must(os.MkdirAll(filepath.Dir(outPath), 0o755))
 	must(os.WriteFile(outPath, code, 0o644))
@@ -87,7 +100,7 @@ func resolveImportPaths(root string, providers []Provider) (map[string]string, e
 }
 
 func goListPkg(dir string) (*GoListPkg, error) {
-	cmd := exec.Command("go", "list", "-json", ".")
+	cmd := exec.Command("go", "list", "-e", "-json", ".")
 	cmd.Dir = dir
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout

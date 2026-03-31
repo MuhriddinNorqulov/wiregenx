@@ -8,19 +8,33 @@ const (
 	ScopePrototype Scope = "prototype"
 )
 
-// Provider represents a function annotated with @Inject, @Factory, or @Application.
+// Provider represents a function annotated with @inject or @app.
 type Provider struct {
 	FuncName   string
 	PkgName    string // package name in source file
 	ImportPath string // full import path (from go list)
 	File       string // absolute file path
 
-	Params     []TypeRef // function parameters (dependencies)
-	ReturnType TypeRef   // primary return type (what this provides)
+	Params     []Param // function parameters (dependencies)
+	ReturnType TypeRef // primary return type (what this provides)
 
-	Scope     Scope
-	IsFactory bool // returns (T, error)
-	IsApp     bool // @Application
+	Scope        Scope
+	ReturnsError bool   // auto-detected: function returns (T, error)
+	IsApp        bool   // @Application annotation
+	AppName      string // name from @Application("name")
+}
+
+// AppGroup represents one @app and all its resolved dependencies.
+type AppGroup struct {
+	App       Provider   // the @app provider
+	Providers []Provider // topologically sorted (dependencies + app itself)
+	Name      string     // container name prefix, e.g. "Http"
+}
+
+// Param represents a single function parameter with its name and type.
+type Param struct {
+	Name string  // parameter name from source, empty if unnamed
+	Type TypeRef // resolved type
 }
 
 // TypeRef represents a resolved Go type reference.
