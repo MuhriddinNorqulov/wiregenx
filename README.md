@@ -7,7 +7,7 @@
 ## Installation
 
 ```bash
-go install github.com/muhriddinnorqulov/wiregenx/v2/cmd/wiregenx2@v2
+go install github.com/muhriddinnorqulov/wiregenx/v2/cmd/wiregenx2@v2.1.0
 ```
 
 ---

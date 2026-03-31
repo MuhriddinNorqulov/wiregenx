@@ -3,6 +3,14 @@
   <component name="GoORMHelperCache">
     <option name="schemaMapping">
       <map>
+        <entry key="App">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/../awesomeProject/http/app.go" />
+              <option value="file://$PROJECT_DIR$/../awesomeProject/ws/app.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="CreateOrder">
           <value>
             <set>
@@ -137,10 +145,22 @@
     </option>
     <option name="scannedPathMapping">
       <map>
+        <entry key="file://$PROJECT_DIR$/../awesomeProject/http/app.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1774960584862" />
+              <option name="schema">
+                <list>
+                  <option value="App" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
         <entry key="file://$PROJECT_DIR$/../awesomeProject/repo/repository.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1774959771741" />
+              <option name="lastModified" value="1774960399756" />
               <option name="schema">
                 <list>
                   <option value="Repository" />
@@ -152,10 +172,22 @@
         <entry key="file://$PROJECT_DIR$/../awesomeProject/service/service1.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1774959771752" />
+              <option name="lastModified" value="1774961246010" />
               <option name="schema">
                 <list>
                   <option value="Service1" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/../awesomeProject/ws/app.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1774960584852" />
+              <option name="schema">
+                <list>
+                  <option value="App" />
                 </list>
               </option>
             </ScannedPath>
@@ -394,6 +426,7 @@
     <option name="tableStructMapping">
       <map>
         <entry key="annotations" value="annotations" />
+        <entry key="app" value="App" />
         <entry key="create_order" value="CreateOrder" />
         <entry key="go_list_pkg" value="GoListPkg" />
         <entry key="imp" value="imp" />
