@@ -7,7 +7,7 @@
 ## Installation
 
 ```bash
-go install github.com/muhriddinnorqulov/wiregenx/v2@latest
+go install github.com/muhriddinnorqulov/wiregenx/v2/cmd/wiregenx2@latest
 ```
 
 ---
@@ -117,7 +117,7 @@ func NewApp(cfg *config.Config, db *database.DB) *App {
 ### Generatsiya
 
 ```bash
-wiregenx --root . --out container/container_gen.go --pkg container
+wiregenx2 --root . --out container/container_gen.go --pkg container
 ```
 
 ### Generatsiya qilingan kod
@@ -236,7 +236,7 @@ func main() {
 | Annotatsiyalar | `@Inject`, `@Factory`, `@Application`, `@Singleton`, `@Prototype` | `@inject`, `@inject(singleton/prototype)`, `@Application("name")` |
 | Container | Bitta `Container` | Har bir `@Application` uchun alohida Container |
 | Constructor | `New() (*Container, error)` | `NewXxxContainer() *XxxContainer` (panic on error) |
-| Install | `go get .../wiregenx` | `go get .../wiregenx/v2` |
+| Binary | `wiregenx` | `wiregenx2` |
 
 ---
 

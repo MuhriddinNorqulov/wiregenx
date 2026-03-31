@@ -183,7 +183,7 @@
         <entry key="file://$PROJECT_DIR$/../mobility/src/infrastructure/persistence/repository/stc_vote_repository_impl.go">
           <value>
             <ScannedPath>
-              <option name="lastModified" value="1774951885160" />
+              <option name="lastModified" value="1774958043789" />
               <option name="schema">
                 <list>
                   <option value="StcVoteRepositoryImpl" />
