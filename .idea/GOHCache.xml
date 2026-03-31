@@ -70,6 +70,20 @@
             </set>
           </value>
         </entry>
+        <entry key="Repository">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/../awesomeProject/repo/repository.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Service1">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/../awesomeProject/service/service1.go" />
+            </set>
+          </value>
+        </entry>
         <entry key="StcVoteEntity">
           <value>
             <set>
@@ -123,6 +137,30 @@
     </option>
     <option name="scannedPathMapping">
       <map>
+        <entry key="file://$PROJECT_DIR$/../awesomeProject/repo/repository.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1774959771741" />
+              <option name="schema">
+                <list>
+                  <option value="Repository" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/../awesomeProject/service/service1.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1774959771752" />
+              <option name="schema">
+                <list>
+                  <option value="Service1" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
         <entry key="file://$PROJECT_DIR$/../mobility/src/core/application/usecases/stcgroupusecases/voting_usecase.go">
           <value>
             <ScannedPath>
@@ -366,6 +404,8 @@
         <entry key="param" value="Param" />
         <entry key="provider" value="Provider" />
         <entry key="redis" value="Redis" />
+        <entry key="repository" value="Repository" />
+        <entry key="service1" value="Service1" />
         <entry key="stc_vote_entity" value="StcVoteEntity" />
         <entry key="stc_vote_model" value="StcVoteModel" />
         <entry key="stc_vote_repository_impl" value="StcVoteRepositoryImpl" />

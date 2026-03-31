@@ -30,12 +30,12 @@ No tests exist yet. No Makefile or CI pipeline.
 
 | Annotation | Purpose |
 |---|---|
-| `@inject` | Marks function as a provider (default: singleton) |
-| `@inject(singleton)` | Single instance, created in constructor |
-| `@inject(prototype)` | New instance per getter call |
-| `@Application("name")` | Application entry point — gets its own named Container |
+| `@Inject` | Marks function as a provider (default: singleton) |
+| `@Inject(Singleton)` | Single instance, created in constructor |
+| `@Inject(Prototype)` | New instance per getter call |
+| `@Application` | Application entry point — gets its own named Container |
 
-Annotations are Go comments above the function: `// @inject`, `// @Application("http")`
+Annotations are Go comments above the function: `// @Inject`, `// @Application`
 
 ## Architecture
 
@@ -59,7 +59,7 @@ Entry point: `cmd/wiregenx2/main.go` → `pkg.Inject()`
 ## Generated Code Structure
 
 - Without `@Application`: single `Container` struct, `New()` constructor
-- With `@Application("name")`: per-app containers (e.g. `HttpContainer`, `AsyncContainer`), each with its own `New{Name}Container()` constructor and only the dependencies that app needs
+- With `@Application`: per-app containers (e.g. `HttpContainer`, `AsyncContainer`), each with its own `New{Name}Container()` constructor and only the dependencies that app needs
 - Constructors never return error — provider errors cause `panic("wiregenx: ...")`
 - Singleton getters return the stored field
 - Prototype getters call the original function each time (panic on error)

@@ -6,7 +6,7 @@ type UserService struct {
 	db *database.DB
 }
 
-// @inject
+// @Inject
 func NewUserService(db *database.DB) *UserService {
 	return &UserService{db: db}
 }

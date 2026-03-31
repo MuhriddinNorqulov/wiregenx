@@ -10,7 +10,7 @@ type App struct {
 	userSvc *service.UserService
 }
 
-// @Application("http")
+// @Application
 func NewApp(cfg *config.Config, userSvc *service.UserService) *App {
 	return &App{cfg: cfg, userSvc: userSvc}
 }

@@ -7,7 +7,7 @@ type Config struct {
 	Workers int
 }
 
-// @inject
+// @Inject
 func NewConfig() *Config {
 	return &Config{
 		DSN:     "postgres://localhost/mydb",

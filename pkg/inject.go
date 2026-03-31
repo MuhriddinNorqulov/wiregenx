@@ -26,7 +26,7 @@ func Inject() {
 	must(err)
 
 	if len(providers) == 0 {
-		fmt.Println("no annotated provider functions found (@inject, @Application)")
+		fmt.Println("no annotated provider functions found (@Inject, @Application)")
 		return
 	}
 
@@ -50,7 +50,7 @@ func Inject() {
 		}
 	}
 
-	// Split into @app and @inject providers
+	// Split into @app and @Inject providers
 	var apps, regular []Provider
 	for _, p := range providers {
 		if p.IsApp {

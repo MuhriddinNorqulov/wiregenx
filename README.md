@@ -1,6 +1,6 @@
 # wiregenx v2
 
-`wiregenx` — Go uchun annotation-based dependency injection container generator. `@inject` va `@Application` annotatsiyalar orqali DI containerlarni avtomatik generatsiya qiladi. **Hech qanday tashqi kutubxona talab qilinmaydi** — generatsiya qilingan kod pure Go.
+`wiregenx` — Go uchun annotation-based dependency injection container generator. `@Inject` va `@Application` annotatsiyalar orqali DI containerlarni avtomatik generatsiya qiladi. **Hech qanday tashqi kutubxona talab qilinmaydi** — generatsiya qilingan kod pure Go.
 
 ---
 
@@ -16,10 +16,10 @@ go install github.com/muhriddinnorqulov/wiregenx/v2/cmd/wiregenx2@v2
 
 | Annotatsiya | Tavsif |
 |---|---|
-| `@inject` | Funksiyani provider sifatida belgilaydi (default: singleton) |
-| `@inject(singleton)` | Faqat bitta instance yaratiladi (default) |
-| `@inject(prototype)` | Har safar yangi instance yaratiladi |
-| `@Application("name")` | Application entry point — alohida nomli Container generatsiya qiladi |
+| `@Inject` | Funksiyani provider sifatida belgilaydi (default: singleton) |
+| `@Inject(Singleton)` | Faqat bitta instance yaratiladi (default) |
+| `@Inject(Prototype)` | Har safar yangi instance yaratiladi |
+| `@Application` | Application entry point — alohida nomli Container generatsiya qiladi |
 
 ---
 
@@ -36,7 +36,7 @@ type Config struct {
     Port int
 }
 
-// @inject
+// @Inject
 func NewConfig() *Config {
     return &Config{DSN: "postgres://localhost/mydb", Port: 8080}
 }
@@ -50,7 +50,7 @@ import "myapp/config"
 
 type DB struct{ cfg *config.Config }
 
-// @inject
+// @Inject
 func NewDB(cfg *config.Config) (*DB, error) {
     return &DB{cfg: cfg}, nil
 }
@@ -64,7 +64,7 @@ import "myapp/database"
 
 type UserService struct{ db *database.DB }
 
-// @inject
+// @Inject
 func NewUserService(db *database.DB) *UserService {
     return &UserService{db: db}
 }
@@ -88,7 +88,7 @@ type App struct {
     userSvc *service.UserService
 }
 
-// @Application("http")
+// @Application
 func NewApp(cfg *config.Config, userSvc *service.UserService) *App {
     return &App{cfg: cfg, userSvc: userSvc}
 }
@@ -108,7 +108,7 @@ type App struct {
     db  *database.DB
 }
 
-// @Application("websocket")
+// @Application
 func NewApp(cfg *config.Config, db *database.DB) *App {
     return &App{cfg: cfg, db: db}
 }
@@ -222,7 +222,7 @@ func main() {
 
 ## Qanday ishlaydi
 
-1. **Scan** — Loyiha fayllarini skanerlab, `@inject` va `@Application` annotatsiyali funksiyalarni topadi
+1. **Scan** — Loyiha fayllarini skanerlab, `@Inject` va `@Application` annotatsiyali funksiyalarni topadi
 2. **Resolve** — `go list -json` orqali import path'larni aniqlaydi
 3. **Graph** — Har bir `@Application` uchun dependency subgraph tuzadi, topologik tartibda saralaydi, circular dependency va topilmagan providerlarni tekshiradi
 4. **Generate** — Har bir app uchun alohida Container struct, konstruktor va getter method'larni generatsiya qiladi
@@ -233,7 +233,7 @@ func main() {
 
 | | v1 | v2 |
 |---|---|---|
-| Annotatsiyalar | `@Inject`, `@Factory`, `@Application`, `@Singleton`, `@Prototype` | `@inject`, `@inject(singleton/prototype)`, `@Application("name")` |
+| Annotatsiyalar | `@Inject`, `@Factory`, `@Application`, `@Singleton`, `@Prototype` | `@Inject`, `@Inject(Singleton/Prototype)`, `@Application` |
 | Container | Bitta `Container` | Har bir `@Application` uchun alohida Container |
 | Constructor | `New() (*Container, error)` | `NewXxxContainer() *XxxContainer` (panic on error) |
 | Binary | `wiregenx` | `wiregenx` |

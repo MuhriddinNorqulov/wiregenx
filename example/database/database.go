@@ -6,7 +6,7 @@ type DB struct {
 	cfg *config.Config
 }
 
-// @inject
+// @Inject
 func NewDB(cfg *config.Config) (*DB, error) {
 	return &DB{cfg: cfg}, nil
 }

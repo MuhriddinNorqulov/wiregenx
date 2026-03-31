@@ -12,8 +12,8 @@ import (
 )
 
 var (
-	reInject      = regexp.MustCompile(`^\s*//\s*@inject(?:\((\w+)\))?\s*$`)
-	reApplication = regexp.MustCompile(`^\s*//\s*@Application\("([^"]+)"\)\s*$`)
+	reInject      = regexp.MustCompile(`^\s*//\s*@Inject(?:\((\w+)\))?\s*$`)
+	reApplication = regexp.MustCompile(`^\s*//\s*@Application\s*$`)
 )
 
 // scanProviders walks the directory tree and finds all annotated provider functions.
@@ -81,7 +81,6 @@ func scanProviders(root string, ignoreVendor, ignoreHidden bool) ([]Provider, er
 				Scope:        scope,
 				ReturnsError: returnsError,
 				IsApp:        ann.isApp,
-				AppName:      ann.appName,
 			})
 		}
 
@@ -97,7 +96,6 @@ func scanProviders(root string, ignoreVendor, ignoreHidden bool) ([]Provider, er
 type annotations struct {
 	isProvider bool
 	isApp      bool
-	appName    string
 	scope      Scope
 }
 
@@ -119,10 +117,6 @@ func parseAnnotations(cg *ast.CommentGroup) annotations {
 		case reApplication.MatchString(c.Text):
 			a.isProvider = true
 			a.isApp = true
-			matches := reApplication.FindStringSubmatch(c.Text)
-			if len(matches) >= 2 {
-				a.appName = matches[1]
-			}
 		}
 	}
 	return a

@@ -79,7 +79,7 @@ func resolveGraph(providers []Provider) ([]Provider, error) {
 
 // resolveApps builds a separate dependency graph for each @app provider.
 func resolveApps(apps []Provider, regular []Provider) ([]AppGroup, error) {
-	// Build type → provider map from @inject providers
+	// Build type → provider map from @Inject providers
 	typeMap := make(map[string]Provider)
 	for _, p := range regular {
 		key := p.ReturnType.FullName()
@@ -143,9 +143,14 @@ func traceDeps(root Provider, typeMap map[string]Provider) ([]Provider, error) {
 	return result, nil
 }
 
-// appContainerName returns the container name prefix from @Application("name").
+// appContainerName derives the container name prefix from the app's import path.
+// e.g. "myapp/transport/http" → "Http"
 func appContainerName(app Provider) string {
-	return upperFirst(app.AppName)
+	seg := app.ImportPath
+	if idx := strings.LastIndex(seg, "/"); idx >= 0 {
+		seg = seg[idx+1:]
+	}
+	return upperFirst(seg)
 }
 
 func findCycle(providers []Provider, typeToIdx map[string]int) string {

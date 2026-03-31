@@ -8,7 +8,7 @@ const (
 	ScopePrototype Scope = "prototype"
 )
 
-// Provider represents a function annotated with @inject or @app.
+// Provider represents a function annotated with @Inject or @app.
 type Provider struct {
 	FuncName   string
 	PkgName    string // package name in source file
@@ -19,9 +19,8 @@ type Provider struct {
 	ReturnType TypeRef // primary return type (what this provides)
 
 	Scope        Scope
-	ReturnsError bool   // auto-detected: function returns (T, error)
-	IsApp        bool   // @Application annotation
-	AppName      string // name from @Application("name")
+	ReturnsError bool // auto-detected: function returns (T, error)
+	IsApp        bool // @Application annotation
 }
 
 // AppGroup represents one @app and all its resolved dependencies.

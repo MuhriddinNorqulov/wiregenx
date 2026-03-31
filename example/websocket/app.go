@@ -10,7 +10,7 @@ type App struct {
 	db  *database.DB
 }
 
-// @Application("websocket")
+// @Application
 func NewApp(cfg *config.Config, db *database.DB) *App {
 	return &App{cfg: cfg, db: db}
 }
